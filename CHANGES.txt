@@ -1,0 +1,5 @@
+0.1.0
+ * full refactor, new package is `pii-manager`
+ * there are now three modes for task implementation
+ * three processing modes (replace, tag, extract)
+ * a file-based API and an object-based API

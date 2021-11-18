@@ -1,21 +1,20 @@
 """
-Create text-anonymizer as a Python package
+Create pii-manager as a Python package
 """
 
 import io
-import os
 import sys
 
 from setuptools import setup, find_packages
 
 from typing import Dict, List
 
-from src.text_anonymizer import VERSION
+from src.pii_manager import VERSION
 
-PKGNAME = 'text-anonymizer'
+PKGNAME = 'pii-manager'
 GITHUB_URL = ''
 DESC = '''
-Anonymize PII fragments contained in text, for different languages & countries
+Process PII fragments contained in text, for different languages & countries
 '''
 
 # --------------------------------------------------------------------
@@ -65,7 +64,7 @@ setup_args = dict(
     tests_require=['pytest'],
 
     entry_points={'console_scripts': [
-        'anonymize-text = text_anonymizer.app.anonymize:main'
+        'pii-manage = pii_manager.app.manage:main'
     ]},
 
     include_package_data=False,

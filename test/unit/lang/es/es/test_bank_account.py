@@ -2,9 +2,8 @@
 Test Spanish Bank Accounts
 '''
 
-from text_anonymizer.tasks import AnonTask
-from text_anonymizer import TextAnonymizer
-
+from pii_manager import PiiEnum
+from pii_manager.api import PiiManager
 
 TEST = [
     # A valid bank account number
@@ -20,17 +19,17 @@ TEST = [
 
 
 def test10_bank_account():
-    obj = TextAnonymizer('es', 'ES', AnonTask.BANK_ACCOUNT)
+    obj = PiiManager('es', 'ES', PiiEnum.BANK_ACCOUNT)
     for doc, exp in TEST:
         got = obj(doc)
-        assert exp == got
+        assert got == exp
 
 
 def test20_bank_account_undefined():
     '''
     Test under another country (hence it will NOT be defined)
     '''
-    obj = TextAnonymizer('es', 'FR', AnonTask.BANK_ACCOUNT)
+    obj = PiiManager('es', 'FR', PiiEnum.BANK_ACCOUNT)
     for doc, exp in TEST:
         got = obj(doc)
-        assert doc == got
+        assert got == doc

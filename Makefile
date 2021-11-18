@@ -6,7 +6,7 @@
 #  make uninstall -> uninstall the package from the virtualenv
 
 # Package name
-NAME := text-anonymizer
+NAME := pii-manager
 
 # Virtualenv to install in. In this order:
 #   1. the one given by the VENV environment variable
@@ -19,7 +19,7 @@ PYTHON ?= python3
 # --------------------------------------------------------------------------
 
 # Package version: taken from the __init__.py file
-VERSION_FILE := src/text_anonymizer/__init__.py
+VERSION_FILE := src/pii_manager/__init__.py
 VERSION	     := $(shell grep VERSION $(VERSION_FILE) | sed -r "s/VERSION = '(.*)'/\1/")
 
 PKGFILE := dist/$(NAME)-$(VERSION).tar.gz
@@ -36,10 +36,14 @@ version:
 clean:
 	rm -f $(PKGFILE)
 
-unit:
-	PYTHONPATH=src:test pytest $(ARGS) test/unit 
-
 rebuild: clean build
+
+venv: $(VENV)
+
+unit: venv pytest
+	PYTHONPATH=src:test $(VENV)/bin/pytest $(ARGS) test/unit 
+
+pytest: $(VENV)/bin/pytest
 
 
 # --------------------------------------------------------------------------
@@ -47,14 +51,18 @@ rebuild: clean build
 $(PKGFILE): $(VERSION_FILE) setup.py
 	$(PYTHON) setup.py sdist
 
-$(VENV):
-	$(PYTHON) -m venv $@
-	$@/bin/pip install -r requirements.txt
-
-install:
+install: $(PKGFILE)
 	$(VENV)/bin/pip install $(PKGFILE)
 
 uninstall:
 	$(VENV)/bin/pip uninstall -y $(NAME)
 
 reinstall: uninstall clean pkg install
+
+
+$(VENV):
+	$(PYTHON) -m venv $@
+	$@/bin/pip install -r requirements.txt
+
+$(VENV)/bin/pytest:
+	$(VENV)/bin/pip install pytest
