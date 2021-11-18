@@ -8,11 +8,11 @@ Find valid bitcoin addresses
 
 import re
 
-from stdnum import bitcoin
-
 from typing import Iterable
 
-from text_anonymizer.tasks import AnonTask
+from stdnum import bitcoin
+
+from pii_manager import PiiEnum
 
 # ----------------------------------------------------------------------------
 
@@ -20,30 +20,21 @@ from text_anonymizer.tasks import AnonTask
 _BITCOIN_PATTERN = (r'( [13] [' + bitcoin._base58_alphabet + ']{25,34}' +
                     '| bc1 [' + bitcoin._bech32_alphabet + ']{8,87})')
 
-_REGEX_BITCOIN = None
-
-
-def init_bitcoin():
-    global _REGEX_BITCOIN
-    _REGEX_BITCOIN = re.compile(_BITCOIN_PATTERN, flags=re.X)
+_REGEX_BITCOIN = re.compile(_BITCOIN_PATTERN, flags=re.X)
 
 
 def get_bitcoin(text: str) -> Iterable[str]:
     '''
-    Bitcoin addresses
+    Bitcoin addresses (P2PKH, P2SH and Bech32), recognize & validate
     '''
-    # Find candidates
-    possible_bitcoin = _REGEX_BITCOIN.findall(text)
-
-    # Validate candidates
-    for ba in possible_bitcoin:
+    # Find and validate candidates
+    for ba in _REGEX_BITCOIN.findall(text):
         if bitcoin.is_valid(ba):
             yield ba
 
 
 # ---------------------------------------------------------------------
 
-ANONTASKS = [
-    (AnonTask.BITCOIN_ADDRESS, init_bitcoin, get_bitcoin,
-     "Bitcoin addresses (P2PKH, P2SH and Bech32), recognize & validate")
+PII_TASKS = [
+    (PiiEnum.BITCOIN_ADDRESS, get_bitcoin)
 ]

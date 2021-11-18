@@ -6,11 +6,11 @@ Note: **NOT** IBAN numbers, those are country (& language) independent
 
 import re
 
-from stdnum.es import ccc
-
 from typing import Iterable
 
-from text_anonymizer.tasks import AnonTask
+from stdnum.es import ccc
+
+from pii_manager import PiiEnum
 
 # ----------------------------------------------------------------------------
 
@@ -21,12 +21,15 @@ _CCC_PATTERN = r'\d{4}\s?\d{4}\s?\d{2}\s?\d{10}'
 _REGEX_CCC = None
 
 
-def init_bank_account():
+def get_spanish_bank_account(text: str) -> Iterable[str]:
+    """
+    Spanish Bank Accounts (código cuenta cliente, 10-digit code, pre-IBAN), recognize & validate
+    """
+    # Compile regex if needed
     global _REGEX_CCC
-    _REGEX_CCC = re.compile(_CCC_PATTERN, flags=re.X)
-
-
-def get_bank_account(text: str) -> Iterable[str]:
+    if _REGEX_CCC is None:
+        _REGEX_CCC = re.compile(_CCC_PATTERN, flags=re.X)
+    # Find all CCCs
     for item in _REGEX_CCC.findall(text):
         if ccc.is_valid(item):
             yield item
@@ -34,7 +37,6 @@ def get_bank_account(text: str) -> Iterable[str]:
 
 # ---------------------------------------------------------------------
 
-ANONTASKS = [
-    (AnonTask.BANK_ACCOUNT, init_bank_account, get_bank_account,
-     "Spanish Bank Accounts (código cuenta cliente, 10-digit code, pre-IBAN), recognize & validate")
+PII_TASKS = [
+    (PiiEnum.BANK_ACCOUNT, get_spanish_bank_account)
 ]

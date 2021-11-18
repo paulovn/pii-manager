@@ -2,8 +2,8 @@
 Test credit card numbers
 '''
 
-from text_anonymizer.tasks import AnonTask
-from text_anonymizer import TextAnonymizer
+from pii_manager import PiiEnum
+from pii_manager.api import PiiManager
 
 
 TEST = [
@@ -29,14 +29,14 @@ TEST = [
 
 
 def test10_credit_card():
-    obj = TextAnonymizer('es', None, AnonTask.CREDIT_CARD)
+    obj = PiiManager('es', None, PiiEnum.CREDIT_CARD)
     for doc, exp in TEST:
         got = obj(doc)
         assert exp == got
 
 
 def test20_credit_card_stats():
-    obj = TextAnonymizer('es', None, AnonTask.CREDIT_CARD)
+    obj = PiiManager('es', None, PiiEnum.CREDIT_CARD)
     for doc, exp in TEST:
         obj(doc)
     assert obj.stats == {'calls': 6,
