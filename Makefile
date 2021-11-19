@@ -20,7 +20,7 @@ PYTHON ?= python3
 
 # Package version: taken from the __init__.py file
 VERSION_FILE := src/pii_manager/__init__.py
-VERSION	     := $(shell grep VERSION $(VERSION_FILE) | sed -r "s/VERSION = '(.*)'/\1/")
+VERSION	     := $(shell grep VERSION $(VERSION_FILE) | sed -r "s/VERSION = \"(.*)\"/\1/")
 
 PKGFILE := dist/$(NAME)-$(VERSION).tar.gz
 
@@ -30,18 +30,18 @@ all:
 
 build pkg: $(PKGFILE)
 
-version:
-	@echo $(VERSION)
-
 clean:
-	rm -f $(PKGFILE)
+	rm -f "$(PKGFILE)"
 
 rebuild: clean build
+
+version:
+	@echo "$(VERSION)"
 
 venv: $(VENV)
 
 unit: venv pytest
-	PYTHONPATH=src:test $(VENV)/bin/pytest $(ARGS) test/unit 
+	PYTHONPATH=src:test $(VENV)/bin/pytest $(ARGS) test/unit
 
 pytest: $(VENV)/bin/pytest
 
@@ -61,6 +61,7 @@ reinstall: uninstall clean pkg install
 
 
 $(VENV):
+	BASE=$$(basename "$@"); test -d "$$BASE" || mkdir -p "$$BASE"
 	$(PYTHON) -m venv $@
 	$@/bin/pip install -r requirements.txt
 

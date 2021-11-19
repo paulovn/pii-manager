@@ -27,7 +27,7 @@ Rules for the implementation of such regex are:
 ## Callable implementation
 
 The next implementation type is via a function. The signature for the function
-is: 
+is:
 
 ```Python
 
@@ -43,7 +43,7 @@ The function name itself is not relevant, since it will be referenced in the
    
 An example can be seen in the [bitcoin address] detector.
 
-**Note**: in case the same entity appears more than once in the passed 
+**Note**: in case the same entity appears more than once in the passed
 document, it might be possible to return repeated strings. This is not a
 problem. Conversely, if a given string in the document is a PII some of the
 times but it also appears in a non-PII role in the document, this
@@ -59,7 +59,7 @@ In this case the task is implemented as a Python class. The class *must*:
 
  * inherit from `pii_manager.helper.BasePiiTask`
  * implement a `find` method with the following signature:
- 
+
         def find(self, doc: str) -> Iterable[PiiEntity]:
 
    i.e. a method returting an iterable of identified [PiiEntity]
@@ -68,18 +68,28 @@ It can also, optionally, include a constructor. In this case, the constructor
 must
  * Accept an arbitrary number of keyword arguments
  * Call the parent class constructor with those arguments
- 
+
 In other words:
 
 ```Python
 
    def __init__(self, **kwargs):
      super().__init__(**kwargs)
-	 ... any code specific to the implementation here ...
+     ... any code specific to the implementation here ...
 ```
 
 
 An example can be seen in the [credit card] detector.
+
+
+## Documentation
+
+All PII Tasks should be documented with a small string that explains what they
+detect. The place to add this documentation is:
+ * For Regex tasks, add the string as the third element in the task descriptor
+   inside `PII_TASKS`
+ * For Callable tasks, use the function docstring to add the documentation.
+ * For Class tasks, add the documentation as the _class level_ docstring.
 
 
 [re.VERBOSE]: https://docs.python.org/3/library/re.html#re.X
