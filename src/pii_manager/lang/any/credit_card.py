@@ -1,14 +1,16 @@
-'''
+"""
 Find valid credit card numbers:
 1. Obtain candidates, by using a generic regex expression
 2. Validate candidates by
     - using a more exact regex
     - validating the number through the Luhn algorithm
-'''
+"""
 
 import re
 
 from stdnum import luhn
+
+from typing import Iterable
 
 from pii_manager import PiiEnum, PiiEntity
 from pii_manager.helper import BasePiiTask
@@ -34,18 +36,21 @@ _REGEX_CC_FULL = None
 
 
 class CreditCard(BasePiiTask):
-    """Credit card numbers for most international credit cards (recognize & validate)"""
+    """
+    Credit card numbers for most international credit cards (detect & validate)
+    """
+
+    pii_name = "credit card"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Compile the big credit card regex
+        # Compile the credit card regexes
         global _REGEX_CC_FULL, _REGEX_CC_BASE
         if _REGEX_CC_FULL is None:
             _REGEX_CC_BASE = re.compile(_CREDIT_PATTERN_BASE, flags=re.VERBOSE)
             _REGEX_CC_FULL = re.compile(_CREDIT_PATTERN, flags=re.VERBOSE)
 
-
-    def find(self, doc: str):
+    def find(self, doc: str) -> Iterable[PiiEntity]:
         # First find candidates
         for cc in _REGEX_CC_BASE.finditer(doc):
             cc_value = cc.group()
@@ -53,7 +58,9 @@ class CreditCard(BasePiiTask):
             strip_cc = re.sub(r"[ -]+", "", cc_value)
             # now validate the credit card number
             if re.fullmatch(_REGEX_CC_FULL, strip_cc) and luhn.is_valid(strip_cc):
-                yield PiiEntity(PiiEnum.CREDIT_CARD, cc.start(), cc_value)
+                yield PiiEntity(
+                    PiiEnum.CREDIT_CARD, cc.start(), cc_value, name=CreditCard.pii_name
+                )
 
 
 # ---------------------------------------------------------------------

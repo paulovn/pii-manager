@@ -1,3 +1,2 @@
-from .taskdict import get_taskdict, country_list, TASK_ANY
+from .taskdict import get_taskdict, country_list
 from .base import BasePiiTask
-

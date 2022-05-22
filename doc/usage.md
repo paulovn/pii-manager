@@ -2,11 +2,15 @@
 
 ## API Usage
 
-There are two types of API usage: the file-based API and the object-based API
+There are two types of API usage: the object-based API (lower-level, based on
+object instantiation) and the file-based API (higher-level, based on function
+calls).
+
 
 ### Object API
 
-Usage of the object-based package API goes like this:
+The object-based API is centered on the `PiiManager` object. Its usage goes
+like this:
 
 ```Python
 
@@ -32,14 +36,15 @@ and UK (assuming all these tasks are implemented in the package).
 
 
 It is also possible to load all possible tasks for a language, by specifying
-country as `all` and using the `all_tasks` argument.
+the country as `COUNTRY_ANY` and using the `all_tasks` argument.
 
 ```Python
 
  from pii_manager import PiiEnum
  from pii_manager.api import PiiManager
+ from pii_manager.lang import COUNTRY_ANY
 
- proc = PiiManager('en', 'all', all_tasks=True)
+ proc = PiiManager('en', COUNTRY_ANY, all_tasks=True)
 
  text_out = proc(text_in)
 
@@ -51,11 +56,14 @@ country as `all` and using the `all_tasks` argument.
  * country-dependent tasks for *all* countries implemented under the `en`
    language
 
+Finally, the API allows for [importing arbitrary tasks] defined outside the
+package.
+
 
 ### File-based API
 
-The file-based API reads from a file, and writes to an output file. It is
-executed as:
+The file-based API uses the `process_file` function to read from a file and
+write the result to an output file. It is executed as:
 
 ```Python
 
@@ -68,13 +76,14 @@ executed as:
  tasklist = (PiiEnum.CREDIT_CARD, PiiEnum.GOVID, PiiEnum.DISEASE)
 
  # Process the file
- process_file(infilename, outfilename, lang, 
+ process_file(infilename, outfilename, lang,
               country=country, tasks=tasklist)
 
 ```
 
 The file-based API accepts also the `all_tasks` argument to add all suitable
-defined tasks.
+defined tasks, as well as the `COUNTRY_ANY` option. It can also [import
+external tasks], as defined in a JSON file.
 
 
 ## Command-line usage
@@ -84,11 +93,11 @@ that can be used to process files through PII tasks:
 
     pii-manage <infile> <outfile> --lang es --country es ar mx \
        --tasks CREDIT_CARD BITCOIN_ADDRESS BANK_ACCOUNT
-	
+
 or, to add all possible tasks for a given language:
 
     pii-manage <infile> <outfile> --lang es --country all \
-       --all-tasks 
+       --all-tasks
 
 
 There is an additional command-line script, `pii-task-info`, that does not
@@ -97,12 +106,12 @@ process text; it is only used to show the available tasks for a given language.
 
 ## Processing mode
 
-PII processing accetps three modes: _replace_ , _tag_ and _extract_. To show
-an example, let us consider a fragment such as:
+PII processing accepts four modes: _replace_ , _tag_, _extract_ and _full_. To
+show an example, let us consider a fragment such as:
 
 > my credit card number is 4273 9666 4581 5642
 
-with this input, the output for each of the three processing modes will be:
+with this input, the output for each of the processing modes will be:
 
 * for _replace_, the PII will be replaced by a placeholder describing the PII
   name:
@@ -119,13 +128,23 @@ with this input, the output for each of the three processing modes will be:
 
 > {"name": "CREDIT_CARD", "value": "4273 9666 4581 5642", "pos": 25, "line": 1}
 
+* for _full_ mode, the API returns a dict or a NDJSON line for each text
+  fragment, containing the fields `text` (the passed text) and `entities`
+  (a list of the recognized PII entities)
+
+> {"text": "my credit card number is 4273 9666 4581 5642",
+>  "entities": [{"name": "CREDIT_CARD", "value": "4273 9666 4581 5642",
+>                "pos": 25, "line": 1}]
+> }
+
 
 By default in _replace_ mode all PII items found will be substituted with
 a `<PIINAME>` string. If another placeholder is preferred, the `PiiManager`
 constructor can be called with an additional `template` argument, containing
 a string that will be processed through the Python string `format()` method,
 and called with a `(name=PIINAME)` argument. In _tag_ mode, the template is
-called with `(name=PIINAME, value=VALUE)` argument.
+called with `(country=COUNTRY, name=PIINAME, value=VALUE)` arguments,
+which the template can use as it sees fit.
 
 The file-based API has an additional option: how the file is splitted when
 calling the PII tasks:
@@ -136,3 +155,5 @@ calling the PII tasks:
 
 
 [NDJSON]: http://ndjson.org/
+[importing arbitrary tasks]: external.md#object-based-api
+[import external tasks]:external.md#file-based-api
